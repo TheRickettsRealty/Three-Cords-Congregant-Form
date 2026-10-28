@@ -4,98 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment Request Form</title>
-
   <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --border: #e2e8f0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 24px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      background: var(--card-bg);
-      width: 100%;
-      max-width: 640px;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border);
-    }
-
+    :root { --primary: #2563eb; --bg: #f8fafc; --card-bg: #ffffff; --text: #0f172a; --border: #e2e8f0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 24px; display: flex; justify-content: center; }
+    .container { background: var(--card-bg); width: 100%; max-width: 640px; border-radius: 12px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border); }
     h1 { font-size: 24px; margin-top: 0; margin-bottom: 4px; }
     .subtitle { color: #64748b; font-size: 14px; margin-bottom: 24px; }
-    
     .page { display: none; }
     .page.active { display: block; }
-
     .form-group { margin-bottom: 20px; }
     label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
     .subtext { font-size: 12px; color: #64748b; margin-top: 4px; line-height: 1.4; }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; box-sizing: border-box; }
     .row { display: flex; gap: 12px; }
     .row .form-group { flex: 1; }
-
-    .card-box {
-      border: 1px solid var(--border);
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      background: #fafafa;
-    }
-
+    .card-box { border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 16px; background: #fafafa; }
     .btn-group { display: flex; justify-content: space-between; margin-top: 28px; }
-    
-    button {
-      padding: 10px 20px;
-      border-radius: 6px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
+    button { padding: 10px 20px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
     .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
     .btn-secondary { background: #e2e8f0; color: #334155; }
-
-    #loadingOverlay {
-      display: none;
-      text-align: center;
-      padding: 40px 0;
-    }
-
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 16px auto;
-    }
-
+    #loadingOverlay { display: none; text-align: center; padding: 40px 0; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; margin: 0 auto 16px auto; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
@@ -108,21 +37,13 @@
   </div>
 
   <form id="paymentForm">
-    
-    <!-- PAGE 1 -->
     <div class="page active" id="page1">
       <h1 id="churchTitle">Payment Request Form</h1>
       <div class="subtitle">For Invoices or Reimbursements</div>
 
       <div class="row">
-        <div class="form-group">
-          <label>First Name *</label>
-          <input type="text" id="reqFirstName" required>
-        </div>
-        <div class="form-group">
-          <label>Last Name *</label>
-          <input type="text" id="reqLastName" required>
-        </div>
+        <div class="form-group"><label>First Name *</label><input type="text" id="reqFirstName" required></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="reqLastName" required></div>
       </div>
 
       <div class="form-group">
@@ -137,10 +58,7 @@
 
       <div class="form-group">
         <label>Expense Category / Ministry *</label>
-        <select id="ministry" required>
-          <option value="">Loading ministries...</option>
-        </select>
-        <div class="subtext">Funds will come out of the selected expense category budget.</div>
+        <select id="ministry" required><option value="">Loading ministries...</option></select>
       </div>
 
       <div class="btn-group">
@@ -152,19 +70,15 @@
     <!-- PAGE 2: REIMBURSEMENT -->
     <div class="page" id="page2_reimbursement">
       <h1>Reimbursement Details</h1>
-      
       <div class="form-group">
         <label>How many transactions are covered? (1-7) *</label>
         <input type="number" id="txCount" min="1" max="7" value="1" onchange="renderTransactions()">
       </div>
-
       <div id="transactionContainer"></div>
-
       <div class="form-group">
         <label>Total Amount Requested</label>
         <input type="text" id="reimTotalDisplay" value="$0.00" readonly style="background: #f1f5f9; font-weight: bold;">
       </div>
-
       <div class="btn-group">
         <button type="button" class="btn-secondary" onclick="prevPage(1)">Back</button>
         <button type="button" class="btn-primary" onclick="nextPage(3)">Next</button>
@@ -174,23 +88,9 @@
     <!-- PAGE 2: INVOICE -->
     <div class="page" id="page2_invoice">
       <h1>Invoice Details</h1>
-      <div class="subtitle">Reminder: This form is not used to submit business invoices.</div>
-
-      <div class="form-group">
-        <label>Date of Services/Delivery *</label>
-        <input type="date" id="invDate">
-      </div>
-
-      <div class="form-group">
-        <label>What service/item was provided? *</label>
-        <input type="text" id="invDesc" maxlength="38">
-      </div>
-
-      <div class="form-group">
-        <label>What is the total cost? ($) *</label>
-        <input type="number" step="0.01" id="invCost" placeholder="28.20">
-      </div>
-
+      <div class="form-group"><label>Date of Services/Delivery *</label><input type="date" id="invDate"></div>
+      <div class="form-group"><label>What service/item was provided? *</label><input type="text" id="invDesc" maxlength="38"></div>
+      <div class="form-group"><label>What is the total cost? ($) *</label><input type="number" step="0.01" id="invCost" placeholder="28.20"></div>
       <div class="btn-group">
         <button type="button" class="btn-secondary" onclick="prevPage(1)">Back</button>
         <button type="button" class="btn-primary" onclick="nextPage(3)">Next</button>
@@ -200,18 +100,10 @@
     <!-- PAGE 3 -->
     <div class="page" id="page3">
       <h1>Payee Details</h1>
-
       <div class="row">
-        <div class="form-group">
-          <label>Who should the check be written out to? (First Name) *</label>
-          <input type="text" id="payeeFirstName" required>
-        </div>
-        <div class="form-group">
-          <label>Last Name *</label>
-          <input type="text" id="payeeLastName" required>
-        </div>
+        <div class="form-group"><label>Check Payable To (First Name) *</label><input type="text" id="payeeFirstName" required></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="payeeLastName" required></div>
       </div>
-
       <div class="btn-group">
         <button type="button" class="btn-secondary" onclick="prevPage(2)">Back</button>
         <button type="button" class="btn-primary" onclick="nextPage(4)">Next</button>
@@ -222,23 +114,22 @@
     <div class="page" id="page4">
       <h1>Submit for Confirmation</h1>
       <div class="subtext" style="font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
-        All congregant payments are subject to ministry leader confirmation or board approval depending on the category and amount. By clicking submit, you understand that an email will be sent requesting confirmation before payment is remitted.
+        All congregant payments are subject to ministry leader confirmation or board approval. By clicking submit, an email will be sent requesting confirmation before payment is remitted.
       </div>
-
       <div class="btn-group">
         <button type="button" class="btn-secondary" onclick="prevPage(3)">Back</button>
         <button type="button" class="btn-primary" onclick="submitForm()">Submit Request</button>
       </div>
     </div>
-
   </form>
 </div>
 
 <script>
-  // REPLACE WITH YOUR PUBLISHED APPS SCRIPT WEB APP URL
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyscucCPtVXr7zSy5sWEctor3oLHRsyhzYOaPDSuc8X7bMWpSI2CLQ17RtxHDmHscr9lw/exec";
 
-  let currentPage = 1;
+  // Grab client identifier from URL (e.g., ?client=park-community)
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientSlug = urlParams.get('client') || 'default';
 
   window.onload = function() {
     loadConfig();
@@ -246,66 +137,42 @@
   };
 
   function loadConfig() {
-    fetch(APPS_SCRIPT_URL + "?action=getConfig")
+    fetch(`${APPS_SCRIPT_URL}?action=getConfig&client=${clientSlug}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
-          if (data.churchName) {
-            document.getElementById('churchTitle').innerText = data.churchName + " Payment Request Form";
-          }
+          if (data.churchName) document.getElementById('churchTitle').innerText = data.churchName + " Payment Request Form";
           const sel = document.getElementById('ministry');
           sel.innerHTML = '<option value="">Select Category</option>';
-          data.ministries.forEach(m => {
-            sel.innerHTML += `<option value="${m}">${m}</option>`;
-          });
+          data.ministries.forEach(m => { sel.innerHTML += `<option value="${m}">${m}</option>`; });
         }
       });
   }
 
   function nextPage(targetPage) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
     if (targetPage === 2) {
       const type = document.getElementById('submissionType').value;
-      if (type === 'Reimbursement') {
-        document.getElementById('page2_reimbursement').classList.add('active');
-      } else {
-        document.getElementById('page2_invoice').classList.add('active');
-      }
-    } else if (targetPage === 3) {
-      document.getElementById('page3').classList.add('active');
-    } else if (targetPage === 4) {
-      document.getElementById('page4').classList.add('active');
+      document.getElementById(type === 'Reimbursement' ? 'page2_reimbursement' : 'page2_invoice').classList.add('active');
+    } else {
+      document.getElementById(`page${targetPage}`).classList.add('active');
     }
-    currentPage = targetPage;
   }
 
-  function prevPage(targetPage) {
-    nextPage(targetPage);
-  }
+  function prevPage(targetPage) { nextPage(targetPage); }
 
   function renderTransactions() {
     const count = parseInt(document.getElementById('txCount').value) || 1;
     const container = document.getElementById('transactionContainer');
     container.innerHTML = '';
-
     for (let i = 1; i <= Math.min(count, 7); i++) {
       container.innerHTML += `
         <div class="card-box">
           <label>Transaction ${i}</label>
-          <div class="form-group">
-            <input type="date" class="tx-date" required>
-          </div>
-          <div class="form-group">
-            <input type="text" class="tx-desc" placeholder="What was the purchase for?" maxlength="38" required>
-          </div>
-          <div class="form-group">
-            <input type="number" step="0.01" class="tx-cost" placeholder="Amount ($)" onchange="calcTotal()" required>
-          </div>
-          <div class="form-group">
-            <label style="font-size: 12px;">Upload Receipt (PDF, PNG, JPG)</label>
-            <input type="file" class="tx-file" accept=".pdf,.png,.jpg,.jpeg">
-          </div>
+          <div class="form-group"><input type="date" class="tx-date" required></div>
+          <div class="form-group"><input type="text" class="tx-desc" placeholder="What was the purchase for?" maxlength="38" required></div>
+          <div class="form-group"><input type="number" step="0.01" class="tx-cost" placeholder="Amount ($)" onchange="calcTotal()" required></div>
+          <div class="form-group"><label style="font-size: 12px;">Upload Receipt (PDF, PNG, JPG)</label><input type="file" class="tx-file" accept=".pdf,.png,.jpg,.jpeg"></div>
         </div>
       `;
     }
@@ -313,9 +180,7 @@
 
   function calcTotal() {
     let sum = 0;
-    document.querySelectorAll('.tx-cost').forEach(el => {
-      sum += parseFloat(el.value) || 0;
-    });
+    document.querySelectorAll('.tx-cost').forEach(el => { sum += parseFloat(el.value) || 0; });
     document.getElementById('reimTotalDisplay').value = "$" + sum.toFixed(2);
   }
 
@@ -325,45 +190,29 @@
 
     const type = document.getElementById('submissionType').value;
     const payeeName = document.getElementById('payeeFirstName').value;
-
     let subfolderId = "";
 
-    // Handle File Uploads via Direct Resumable Upload to Google Drive
     if (type === 'Reimbursement') {
       const files = document.querySelectorAll('.tx-file');
       for (let i = 0; i < files.length; i++) {
         if (files[i].files.length > 0) {
           const file = files[i].files[0];
-          
-          // 1. Get Resumable Upload URL from Apps Script
           const sessionRes = await fetch(APPS_SCRIPT_URL, {
             method: "POST",
-            body: JSON.stringify({
-              action: "createUploadSession",
-              submissionType: type,
-              vendorName: payeeName,
-              filename: `File${i + 1}_` + file.name
-            })
+            body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: `File${i + 1}_` + file.name })
           });
-          
           const sessionData = await sessionRes.json();
           if (sessionData.status === "success") {
             subfolderId = sessionData.subfolderId;
-            
-            // 2. Stream raw file bytes directly to Google Drive from the browser
-            await fetch(sessionData.uploadUrl, {
-              method: "PUT",
-              headers: { "Content-Type": file.type },
-              body: file
-            });
+            await fetch(sessionData.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
           }
         }
       }
     }
 
-    // Build payload to send to Apps Script
     const payload = {
       action: "submitForm",
+      client: clientSlug,
       reqFirstName: document.getElementById('reqFirstName').value,
       reqLastName: document.getElementById('reqLastName').value,
       submissionType: type,
@@ -383,36 +232,21 @@
       const descs = document.querySelectorAll('.tx-desc');
       const costs = document.querySelectorAll('.tx-cost');
       const files = document.querySelectorAll('.tx-file');
-
       for (let i = 0; i < dates.length; i++) {
-        payload.transactions.push({
-          date: dates[i].value,
-          desc: descs[i].value,
-          cost: costs[i].value,
-          fileUploaded: files[i].files.length > 0
-        });
+        payload.transactions.push({ date: dates[i].value, desc: descs[i].value, cost: costs[i].value, fileUploaded: files[i].files.length > 0 });
       }
     }
 
-    // Submit payload to Google Apps Script
-    const finalRes = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
-
+    const finalRes = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
     const result = await finalRes.json();
     if (result.status === 'success') {
-      document.getElementById('loadingOverlay').innerHTML = `
-        <h2 style="color: #16a34a;">Thank You!</h2>
-        <p>Your payment request has been submitted and sent for approval.</p>
-      `;
+      document.getElementById('loadingOverlay').innerHTML = `<h2 style="color: #16a34a;">Thank You!</h2><p>Your payment request has been submitted.</p>`;
     } else {
-      alert("Submission Error: " + result.message);
+      alert("Error: " + result.message);
       document.getElementById('paymentForm').style.display = 'block';
       document.getElementById('loadingOverlay').style.display = 'none';
     }
   }
 </script>
-
 </body>
 </html>
