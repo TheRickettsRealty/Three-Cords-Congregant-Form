@@ -164,18 +164,44 @@
   function renderTransactions() {
     const count = parseInt(document.getElementById('txCount').value) || 1;
     const container = document.getElementById('transactionContainer');
+    
+    // 1. Capture any existing user inputs before wiping the DOM
+    const existingData = [];
+    container.querySelectorAll('.card-box').forEach(box => {
+      existingData.push({
+        date: box.querySelector('.tx-date').value,
+        desc: box.querySelector('.tx-desc').value,
+        cost: box.querySelector('.tx-cost').value
+      });
+    });
+
+    // 2. Rebuild container based on new count
     container.innerHTML = '';
+
     for (let i = 1; i <= Math.min(count, 7); i++) {
+      // Pull back previously entered data for this row index if it exists
+      const data = existingData[i - 1] || { date: '', desc: '', cost: '' };
+      
       container.innerHTML += `
         <div class="card-box">
           <label>Transaction ${i}</label>
-          <div class="form-group"><input type="date" class="tx-date" required></div>
-          <div class="form-group"><input type="text" class="tx-desc" placeholder="What was the purchase for?" maxlength="38" required></div>
-          <div class="form-group"><input type="number" step="0.01" class="tx-cost" placeholder="Amount ($)" onchange="calcTotal()" required></div>
-          <div class="form-group"><label style="font-size: 12px;">Upload Receipt (PDF, PNG, JPG)</label><input type="file" class="tx-file" accept=".pdf,.png,.jpg,.jpeg"></div>
+          <div class="form-group">
+            <input type="date" class="tx-date" value="${data.date}" required>
+          </div>
+          <div class="form-group">
+            <input type="text" class="tx-desc" placeholder="What was the purchase for?" maxlength="38" value="${data.desc}" required>
+          </div>
+          <div class="form-group">
+            <input type="number" step="0.01" class="tx-cost" placeholder="Amount ($)" value="${data.cost}" onchange="calcTotal()" required>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 12px;">Upload Receipt (PDF, PNG, JPG)</label>
+            <input type="file" class="tx-file" accept=".pdf,.png,.jpg,.jpeg">
+          </div>
         </div>
       `;
     }
+    calcTotal();
   }
 
   function calcTotal() {
