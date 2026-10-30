@@ -210,6 +210,13 @@
     document.getElementById('reimTotalDisplay').value = "$" + sum.toFixed(2);
   }
 
+const toBase64 = file => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result.split(',')[1]);
+  reader.onerror = error => reject(error);
+});
+  
   async function submitForm() {
     document.getElementById('paymentForm').style.display = 'none';
     document.getElementById('loadingOverlay').style.display = 'block';
@@ -217,6 +224,9 @@
     const type = document.getElementById('submissionType').value;
     const payeeName = document.getElementById('payeeFirstName').value;
     let subfolderId = "";
+    let base64File = "";
+    let fileName = "";
+    let fileType = "";
 
     if (type === 'Reimbursement') {
       const files = document.querySelectorAll('.tx-file');
@@ -225,12 +235,15 @@
           const file = files[i].files[0];
           const sessionRes = await fetch(APPS_SCRIPT_URL, {
             method: "POST",
-            body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: `File${i + 1}_` + file.name })
+            body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: `File${i + 1}_`})
           });
           const sessionData = await sessionRes.json();
           if (sessionData.status === "success") {
             subfolderId = sessionData.subfolderId;
-            await fetch(sessionData.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+           // await fetch(sessionData.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+            base64File = await toBase64(file);
+            fileName = file.name;
+            fileType = file.type;
           }
         }
       }
@@ -251,6 +264,10 @@
       invDate: document.getElementById('invDate').value,
       invDesc: document.getElementById('invDesc').value,
       invCost: document.getElementById('invCost').value
+      // include file base64 data
+      fileData: base64File,
+      fileName: fileName,
+      fileType: fileType
     };
 
     if (type === 'Reimbursement') {
