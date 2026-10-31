@@ -218,23 +218,26 @@ const toBase64 = file => new Promise((resolve, reject) => {
 });
   
   async function submitForm() {
-    document.getElementById('paymentForm').style.display = 'none';
+    const form = document.getElementById('paymentForm');
     const loadingOverlay = document.getElementById('loadingOverlay');
+  
+    form.style.display = 'none';
     loadingOverlay.style.display = 'block';
 
-    // 1. Set default loading text
+    // 1. Render your spinner and status text container
     loadingOverlay.innerHTML = `
-    <h2>Submitting...</h2>
-    <p id="dynamicLoadingText">Processing your request...</p>
-  `;
+      <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
+      <h2 id="loadingTitle" style="color: #1f2937; margin-bottom: 5px;">Submitting Request</h2>
+      <p id="loadingStatus" style="color: #4b5563;">Preparing and encoding files...</p>
+    `;
 
-    // 2. Start a 3-second timer for slow uploads
-    let uploadTimer = setTimeout(() => {
-    const textEl = document.getElementById('dynamicLoadingText');
-    if (textEl) {
-      textEl.innerText = "Attempting to upload your file(s)...";
-      }
-    }, 10000);
+    // Helper to update text dynamically as steps execute
+    const setStatus = (title, status) => {
+      const titleEl = document.getElementById('loadingTitle');
+      const statusEl = document.getElementById('loadingStatus');
+      if (titleEl) titleEl.innerText = title;
+      if (statusEl) statusEl.innerText = status;
+    };
     
     try {
       const type = document.getElementById('submissionType').value;
@@ -250,6 +253,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
         for (let i = 0; i < files.length; i++) {
           if (files[i].files.length > 0) {
             const file = files[i].files[0];
+            setStatus("Securing Folder", `Preparing for file storage...`);
             const sessionRes = await fetch(APPS_SCRIPT_URL, {
               method: "POST",
               body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: `File${i + 1}_`})
@@ -258,6 +262,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
             if (sessionData.status === "success") {
               subfolderId = sessionData.subfolderId;
              // await fetch(sessionData.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+              setStatus("Uploading File", `Uploading your file(s). This may take up to 30 seconds...`);
               base64File = await toBase64(file);
               fileName = file.name;
               fileType = file.type;
@@ -266,6 +271,8 @@ const toBase64 = file => new Promise((resolve, reject) => {
         }
       }
 
+      setStatus("Finalizing", "Drafting request email...");
+      
       const payload = {
         action: "submitForm",
         client: clientSlug,
