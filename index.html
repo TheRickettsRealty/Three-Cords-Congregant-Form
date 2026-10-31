@@ -227,6 +227,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
     let base64File = "";
     let fileName = "";
     let fileType = "";
+    let fileData = "";
 
     if (type === 'Reimbursement') {
       const files = document.querySelectorAll('.tx-file');
