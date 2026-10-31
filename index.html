@@ -234,7 +234,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
     if (textEl) {
       textEl.innerText = "Attempting to upload your file(s)...";
       }
-    }, 3000);
+    }, 10000);
     
     try {
       const type = document.getElementById('submissionType').value;
