@@ -219,76 +219,102 @@ const toBase64 = file => new Promise((resolve, reject) => {
   
   async function submitForm() {
     document.getElementById('paymentForm').style.display = 'none';
-    document.getElementById('loadingOverlay').style.display = 'block';
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'block';
 
-    const type = document.getElementById('submissionType').value;
-    const payeeName = document.getElementById('payeeFirstName').value;
-    let subfolderId = "";
-    let base64File = "";
-    let fileName = "";
-    let fileType = "";
-    let fileData = "";
+    // 1. Set default loading text
+    loadingOverlay.innerHTML = `
+    <h2>Submitting...</h2>
+    <p id="dynamicLoadingText">Processing your request...</p>
+  `;
 
-    if (type === 'Reimbursement') {
-      const files = document.querySelectorAll('.tx-file');
-      for (let i = 0; i < files.length; i++) {
-        if (files[i].files.length > 0) {
-          const file = files[i].files[0];
-          const sessionRes = await fetch(APPS_SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: `File${i + 1}_`})
-          });
-          const sessionData = await sessionRes.json();
-          if (sessionData.status === "success") {
-            subfolderId = sessionData.subfolderId;
-           // await fetch(sessionData.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
-            base64File = await toBase64(file);
-            fileName = file.name;
-            fileType = file.type;
+    // 2. Start a 3-second timer for slow uploads
+    let uploadTimer = setTimeout(() => {
+    const textEl = document.getElementById('dynamicLoadingText');
+    if (textEl) {
+      textEl.innerText = "Attempting to upload your file(s)...";
+      }
+    }, 3000);
+    
+    try {
+      const type = document.getElementById('submissionType').value;
+      const payeeName = document.getElementById('payeeFirstName').value;
+      let subfolderId = "";
+      let base64File = "";
+      let fileName = "";
+      let fileType = "";
+      let fileData = "";
+
+      if (type === 'Reimbursement') {
+        const files = document.querySelectorAll('.tx-file');
+        for (let i = 0; i < files.length; i++) {
+          if (files[i].files.length > 0) {
+            const file = files[i].files[0];
+            const sessionRes = await fetch(APPS_SCRIPT_URL, {
+              method: "POST",
+              body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: `File${i + 1}_`})
+            });
+            const sessionData = await sessionRes.json();
+            if (sessionData.status === "success") {
+              subfolderId = sessionData.subfolderId;
+             // await fetch(sessionData.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+              base64File = await toBase64(file);
+              fileName = file.name;
+              fileType = file.type;
+            }
           }
         }
       }
-    }
 
-    const payload = {
-      action: "submitForm",
-      client: clientSlug,
-      reqFirstName: document.getElementById('reqFirstName').value,
-      reqLastName: document.getElementById('reqLastName').value,
-      submissionType: type,
-      ministry: document.getElementById('ministry').value,
-      payeeFirstName: payeeName,
-      payeeLastName: document.getElementById('payeeLastName').value,
-      subfolderId: subfolderId,
-      txCount: document.getElementById('txCount').value,
-      transactions: [],
-      invDate: document.getElementById('invDate').value,
-      invDesc: document.getElementById('invDesc').value,
-      invCost: document.getElementById('invCost').value,
-      // include file base64 data
-      fileData: base64File,
-      fileName: fileName,
-      fileType: fileType
-    };
+      const payload = {
+        action: "submitForm",
+        client: clientSlug,
+        reqFirstName: document.getElementById('reqFirstName').value,
+        reqLastName: document.getElementById('reqLastName').value,
+        submissionType: type,
+        ministry: document.getElementById('ministry').value,
+        payeeFirstName: payeeName,
+        payeeLastName: document.getElementById('payeeLastName').value,
+        subfolderId: subfolderId,
+        txCount: document.getElementById('txCount').value,
+        transactions: [],
+        invDate: document.getElementById('invDate').value,
+        invDesc: document.getElementById('invDesc').value,
+        invCost: document.getElementById('invCost').value,
+        // include file base64 data
+        fileData: base64File,
+        fileName: fileName,
+        fileType: fileType
+      };
 
-    if (type === 'Reimbursement') {
-      const dates = document.querySelectorAll('.tx-date');
-      const descs = document.querySelectorAll('.tx-desc');
-      const costs = document.querySelectorAll('.tx-cost');
-      const files = document.querySelectorAll('.tx-file');
-      for (let i = 0; i < dates.length; i++) {
-        payload.transactions.push({ date: dates[i].value, desc: descs[i].value, cost: costs[i].value, fileUploaded: files[i].files.length > 0 });
+      if (type === 'Reimbursement') {
+        const dates = document.querySelectorAll('.tx-date');
+        const descs = document.querySelectorAll('.tx-desc');
+        const costs = document.querySelectorAll('.tx-cost');
+        const files = document.querySelectorAll('.tx-file');
+        for (let i = 0; i < dates.length; i++) {
+          payload.transactions.push({ date: dates[i].value, desc: descs[i].value, cost: costs[i].value, fileUploaded: files[i].files.length > 0 });
+        }
       }
-    }
 
-    const finalRes = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-    const result = await finalRes.json();
-    if (result.status === 'success') {
-      document.getElementById('loadingOverlay').innerHTML = `<h2 style="color: #16a34a;">Thank You!</h2><p>Your payment request has been submitted.</p>`;
-    } else {
-      alert("Error: " + result.message);
+      const finalRes = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+      const result = await finalRes.json();
+      
+      // 3. Clear the timer once response is received
+      clearTimeout(uploadTimer);
+      
+      if (result.status === 'success') {
+        document.getElementById('loadingOverlay').innerHTML = `<h2 style="color: #16a34a;">Thank You!</h2><p>Your payment request has been submitted.</p>`;
+      } else {
+        alert("Error: " + result.message);
+        document.getElementById('paymentForm').style.display = 'block';
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }
+    } catch (err) {
+      clearTimeout(uploadTimer);
+      alert("Submission error: " + err.toString());
       document.getElementById('paymentForm').style.display = 'block';
-      document.getElementById('loadingOverlay').style.display = 'none';
+      loadingOverlay.style.display = 'none';
     }
   }
 </script>
