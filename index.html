@@ -242,30 +242,38 @@ const toBase64 = file => new Promise((resolve, reject) => {
     try {
       const type = document.getElementById('submissionType').value;
       const payeeName = document.getElementById('payeeFirstName').value;
+      const fileInputs = document.querySelectorAll('.tx-file');
+      let hasFiles = Array.from(fileInputs).some(input => input.files.length > 0);
       let subfolderId = "";
+      let uploadedFiles = [];
       let base64File = "";
       let fileName = "";
       let fileType = "";
       let fileData = "";
 
       if (type === 'Reimbursement') {
-        const files = document.querySelectorAll('.tx-file');
-        for (let i = 0; i < files.length; i++) {
-          if (files[i].files.length > 0) {
-            const file = files[i].files[0];
-            setStatus("Securing Folder", `Preparing for file storage...`);
-            const sessionRes = await fetch(APPS_SCRIPT_URL, {
-              method: "POST",
-              body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: `File${i + 1}_`})
-            });
-            const sessionData = await sessionRes.json();
-            if (sessionData.status === "success") {
-              subfolderId = sessionData.subfolderId;
-             // await fetch(sessionData.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
-              setStatus("Uploading File", `Uploading your file(s). This may take up to 30 seconds...`);
-              base64File = await toBase64(file);
-              fileName = file.name;
-              fileType = file.type;
+        setStatus("Securing Folder", `Preparing for file storage...`);
+        const sessionRes = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "createUploadSession", client: clientSlug, submissionType: type, vendorName: payeeName, filename: "Uploaded File"})
+        });
+        const sessionData = await sessionRes.json();
+        
+        if (sessionData.status === "success") {
+          subfolderId = sessionData.subfolderId;
+
+          // 2. Loop through all file inputs and encode them into an array
+          for (let i = 0; i < fileInputs.length; i++) {
+            if (fileInputs[i].files.length > 0) {
+              const file = fileInputs[i].files[0];
+              setStatus(`Uploading file ${i + 1} of ${fileInputs.length}...`);
+            
+              const base64Data = await toBase64(file);
+              uploadedFiles.push({
+              name: `File${i + 1}_` + file.name,
+              type: file.type,
+              data: base64Data
+              });
             }
           }
         }
@@ -288,10 +296,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
         invDate: document.getElementById('invDate').value,
         invDesc: document.getElementById('invDesc').value,
         invCost: document.getElementById('invCost').value,
-        // include file base64 data
-        fileData: base64File,
-        fileName: fileName,
-        fileType: fileType
+        files: uploadedFiles //send complete array of uploaded files as base64
       };
 
       if (type === 'Reimbursement') {
@@ -300,7 +305,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
         const costs = document.querySelectorAll('.tx-cost');
         const files = document.querySelectorAll('.tx-file');
         for (let i = 0; i < dates.length; i++) {
-          payload.transactions.push({ date: dates[i].value, desc: descs[i].value, cost: costs[i].value, fileUploaded: files[i].files.length > 0 });
+          payload.transactions.push({ date: dates[i].value, desc: descs[i].value, cost: costs[i].value, fileUploaded: filesInputs[i].files.length > 0 });
         }
       }
 
