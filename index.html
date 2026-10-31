@@ -238,14 +238,15 @@ const toBase64 = file => new Promise((resolve, reject) => {
       if (titleEl) titleEl.innerText = title;
       if (statusEl) statusEl.innerText = status;
     };
+
+    const type = document.getElementById('submissionType').value;
+    const payeeName = document.getElementById('payeeFirstName').value;
+    const fileInputs = document.querySelectorAll('.tx-file');
+    let hasFiles = Array.from(fileInputs).some(input => input.files.length > 0);
+    let subfolderId = "";
+    let uploadedFiles = [];
     
     try {
-      const type = document.getElementById('submissionType').value;
-      const payeeName = document.getElementById('payeeFirstName').value;
-      const fileInputs = document.querySelectorAll('.tx-file');
-      let hasFiles = Array.from(fileInputs).some(input => input.files.length > 0);
-      let subfolderId = "";
-      let uploadedFiles = [];
       let base64File = "";
       let fileName = "";
       let fileType = "";
