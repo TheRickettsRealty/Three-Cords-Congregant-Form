@@ -306,7 +306,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
         const costs = document.querySelectorAll('.tx-cost');
         const files = document.querySelectorAll('.tx-file');
         for (let i = 0; i < dates.length; i++) {
-          payload.transactions.push({ date: dates[i].value, desc: descs[i].value, cost: costs[i].value, fileUploaded: filesInputs[i].files.length > 0 });
+          payload.transactions.push({ date: dates[i].value, desc: descs[i].value, cost: costs[i].value, fileUploaded: fileInputs[i].files.length > 0 });
         }
       }
 
