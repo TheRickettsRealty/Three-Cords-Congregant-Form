@@ -312,8 +312,6 @@ const toBase64 = file => new Promise((resolve, reject) => {
       const finalRes = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
       const result = await finalRes.json();
       
-      // 3. Clear the timer once response is received
-      clearTimeout(uploadTimer);
       
       if (result.status === 'success') {
         document.getElementById('loadingOverlay').innerHTML = `<h2 style="color: #16a34a;">Thank You!</h2><p>Your payment request has been submitted.</p>`;
@@ -323,7 +321,6 @@ const toBase64 = file => new Promise((resolve, reject) => {
         document.getElementById('loadingOverlay').style.display = 'none';
       }
     } catch (err) {
-      clearTimeout(uploadTimer);
       alert("Submission error: " + err.toString());
       document.getElementById('paymentForm').style.display = 'block';
       loadingOverlay.style.display = 'none';
