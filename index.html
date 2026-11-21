@@ -255,49 +255,55 @@ const toBase64 = file => new Promise((resolve, reject) => {
       if (type === 'Reimbursement') {
         setStatus("Securing Folder", `Preparing for file storage...`);
         
-        let subfolderId = "";
-        let uploadUrl = "";
+        // 1. Create the single staging folder ONCE before uploading any files
+        const sessionRes = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({ 
+            action: "createUploadSession", 
+            client: clientSlug, 
+            submissionType: type, 
+            vendorName: payeeName, 
+            filename: "init" 
+          })
+        });
+        const sessionData = await sessionRes.json();
+        
+        if (sessionData.status === "success") {
+          subfolderId = sessionData.subfolderId; // Assign to the outer scope variable!
 
-        // Loop through file inputs to find and upload files directly
-        for (let i = 0; i < fileInputs.length; i++) {
-          if (fileInputs[i].files.length > 0) {
-            const file = fileInputs[i].files[0];
-            setStatus(`Uploading file ${i + 1} of ${fileInputs.length}...`, file.name);
+          // 2. Loop through file inputs and upload directly into that same folder
+          for (let i = 0; i < fileInputs.length; i++) {
+            if (fileInputs[i].files.length > 0) {
+              const file = fileInputs[i].files[0];
+              setStatus(`Uploading file ${i + 1} of ${fileInputs.length}...`, file.name);
 
-            // Request an upload session for each file (passing subfolderId on subsequent files if needed)
-            const sessionRes = await fetch(APPS_SCRIPT_URL, {
-              method: "POST",
-              body: JSON.stringify({ 
-                action: "createUploadSession", 
-                client: clientSlug, 
-                submissionType: type, 
-                vendorName: payeeName, 
-                filename: `File_${i + 1}${file.name.substring(file.name.lastIndexOf('.'))}`,
-                subfolderId: subfolderId // pass existing ID after the first file
-              })
-            });
-            const sessionData = await sessionRes.json();
-            
-            if (sessionData.status === "success") {
-              subfolderId = sessionData.subfolderId;
-              uploadUrl = sessionData.uploadUrl;
-
-              // Upload the raw binary file directly to Google Drive via the resumable uploadUrl
-              await fetch(uploadUrl, {
-                method: "PUT",
-                headers: {
-                  "Content-Type": file.type || "application/octet-stream"
-                },
-                body: file
+              // Request a resumable upload URL for this specific file inside the existing folder
+              const uploadRes = await fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({ 
+                  action: "createUploadSession", 
+                  client: clientSlug, 
+                  submissionType: type, 
+                  vendorName: payeeName, 
+                  filename: `File_${i + 1}${file.name.substring(file.name.lastIndexOf('.'))}`,
+                  subfolderId: subfolderId // Pass the existing folder ID so it drops inside it!
+                })
               });
-
-              uploadedFiles.push({ fileUploaded: true });
+              const uploadData = await uploadRes.json();
+              
+              if (uploadData.status === "success" && uploadData.uploadUrl) {
+                // Upload the raw binary file directly to Google Drive
+                await fetch(uploadData.uploadUrl, {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": file.type || "application/octet-stream"
+                  },
+                  body: file
+                });
+              }
             }
           }
         }
-        
-        // Save the final subfolderId into your payload variable
-        window.tempSubfolderId = subfolderId; 
       }
         //setStatus("Securing Folder", `Preparing for file storage...`);
         //const sessionRes = await fetch(APPS_SCRIPT_URL, {
