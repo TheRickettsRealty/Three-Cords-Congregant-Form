@@ -315,7 +315,13 @@ const toBase64 = file => new Promise((resolve, reject) => {
       
       
       if (result.status === 'success') {
-        document.getElementById('loadingOverlay').innerHTML = `<h2 style="color: #16a34a;">Thank You!</h2><p>Your payment request has been submitted.</p>`;
+        document.getElementById('loadingOverlay').innerHTML = `
+          <h2 style="color: #16a34a;">Thank You!</h2>
+          <p>Your payment request has been submitted.</p>
+          <button type="button" onclick="window.location.reload()" style="margin-top: 16px; padding: 10px 20px; font-size: 16px; background-color: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Submit Another Request
+          </button>
+        `;
       } else {
         alert("Error: " + result.message);
         document.getElementById('paymentForm').style.display = 'block';
