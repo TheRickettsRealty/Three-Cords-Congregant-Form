@@ -271,7 +271,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
             
               const base64Data = await toBase64(file);
               uploadedFiles.push({
-              name: `File${i + 1}_` + file.name,
+              name: `File${i + 1}`,
               type: file.type,
               data: base64Data
               });
