@@ -253,9 +253,9 @@ const toBase64 = file => new Promise((resolve, reject) => {
       let fileData = "";
 
       if (type === 'Reimbursement') {
-        setStatus("Securing Folder", `Preparing for file storage...`);
-        
-        // 1. Create the single staging folder ONCE before uploading any files
+        setStatus("Securing Folder", "Preparing for file storage...");
+  
+        // 1. Create the single staging folder ONCE
         const sessionRes = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
           body: JSON.stringify({ 
@@ -267,40 +267,30 @@ const toBase64 = file => new Promise((resolve, reject) => {
           })
         });
         const sessionData = await sessionRes.json();
-        
+  
         if (sessionData.status === "success") {
-          subfolderId = sessionData.subfolderId; // Assign to the outer scope variable!
+          subfolderId = sessionData.subfolderId;
 
-          // 2. Loop through file inputs and upload directly into that same folder
+          //  2. Loop through file inputs and upload them individually to your Apps Script endpoint
           for (let i = 0; i < fileInputs.length; i++) {
             if (fileInputs[i].files.length > 0) {
               const file = fileInputs[i].files[0];
               setStatus(`Uploading file ${i + 1} of ${fileInputs.length}...`, file.name);
 
-              // Request a resumable upload URL for this specific file inside the existing folder
-              const uploadRes = await fetch(APPS_SCRIPT_URL, {
+              const base64Data = await toBase64(file);
+              const cleanFileName = `File ${i + 1}${file.name.substring(file.name.lastIndexOf('.'))}`;
+
+              // Send to your own Apps Script URL (Zero CORS issues)
+              await fetch(APPS_SCRIPT_URL, {
                 method: "POST",
                 body: JSON.stringify({ 
-                  action: "createUploadSession", 
-                  client: clientSlug, 
-                  submissionType: type, 
-                  vendorName: payeeName, 
-                  filename: `File_${i + 1}${file.name.substring(file.name.lastIndexOf('.'))}`,
-                  subfolderId: subfolderId // Pass the existing folder ID so it drops inside it!
+                  action: "uploadSingleFile",
+                  subfolderId: subfolderId,
+                  fileName: cleanFileName,
+                  fileType: file.type,
+                  fileData: base64Data
                 })
-              });
-              const uploadData = await uploadRes.json();
-              
-              if (uploadData.status === "success" && uploadData.uploadUrl) {
-                // Upload the raw binary file directly to Google Drive
-                await fetch(uploadData.uploadUrl, {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": file.type || "application/octet-stream"
-                  },
-                  body: file
-                });
-              }
+              });  
             }
           }
         }
