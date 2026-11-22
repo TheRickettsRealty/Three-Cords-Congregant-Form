@@ -270,13 +270,11 @@ const toBase64 = file => new Promise((resolve, reject) => {
   
         if (sessionData.status === "success") {
           subfolderId = sessionData.subfolderId;
-          let uploadedFilesCount = 0;
 
           //  2. Loop through file inputs and upload them individually to your Apps Script endpoint
           for (let i = 0; i < fileInputs.length; i++) {
             if (fileInputs[i].files.length > 0) {
               const file = fileInputs[i].files[0];
-              uploadedFilesCount++;
               setStatus(`Uploading file ${i + 1} of ${fileInputs.length}...`, file.name);
 
               const base64Data = await toBase64(file);
@@ -340,7 +338,6 @@ const toBase64 = file => new Promise((resolve, reject) => {
         invDate: document.getElementById('invDate').value,
         invDesc: document.getElementById('invDesc').value,
         invCost: document.getElementById('invCost').value,
-        files: uploadedFilesCount //send number of files
       };
 
       if (type === 'Reimbursement') {
